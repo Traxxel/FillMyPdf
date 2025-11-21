@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Environment variables
+.env
+*.env
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific - AI/Planning documents
+PROJEKT.md
+TECHSTACK.md
+python/PROJEKT.md
+
+# Test/Debug scripts
+python/inspect_pdf.py
+python/inspect_writer.py
+python/debug_acroform.py
+python/debug_fix.py
+python/check_text.py
+python/check_page_annots.py
+python/inspect_all_fields.py
+
+# Output files (optional - uncomment if you don't want to track outputs)
+# output/*.pdf
+# input/*.pdf
+
+# Logs
+*.log

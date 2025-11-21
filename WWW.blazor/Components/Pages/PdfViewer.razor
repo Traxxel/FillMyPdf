@@ -1,0 +1,41 @@
+@page "/pdf-viewer/{FileName}"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+
+<PageTitle>PDF Viewer - @FileName</PageTitle>
+
+<div class="neo-header">
+    <div class="neo-container">
+        <button class="neo-btn" @onclick="GoBack" style="background-color: var(--neo-white); margin-bottom: 1rem;">
+            ← Back
+        </button>
+        <h1>📄 @FileName</h1>
+    </div>
+</div>
+
+<div class="neo-container">
+    <div class="neo-card" style="padding: 0; overflow: hidden;">
+        <iframe src="@GetPdfUrl()" 
+                style="width: 100%; height: 80vh; border: none;">
+        </iframe>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string FileName { get; set; } = string.Empty;
+
+    private string GetPdfUrl()
+    {
+        // URL-encode the filename
+        var encodedFileName = Uri.EscapeDataString(FileName);
+        return $"/uploads/{encodedFileName}";
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo(Navigation.Uri.Contains("/project/") 
+            ? Navigation.Uri.Substring(0, Navigation.Uri.IndexOf("/pdf-viewer"))
+            : "/");
+    }
+}

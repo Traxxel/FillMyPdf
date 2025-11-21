@@ -44,8 +44,14 @@ else
                     @foreach (var file in project.InputFiles)
                     {
                         <li class="neo-file-item">
-                            <span>📄 @file.FileName (@FormatFileSize(file.FileSize))</span>
-                            <span style="font-size: 0.875rem;">@file.UploadedAt.ToString("HH:mm")</span>
+                            <div style="flex: 1;">
+                                <span>📄 @file.FileName (@FormatFileSize(file.FileSize))</span>
+                                <span style="font-size: 0.875rem; margin-left: 1rem;">@file.UploadedAt.ToString("HH:mm")</span>
+                            </div>
+                            <button class="neo-btn" @onclick="() => ViewPdf(file.FileName)" 
+                                    style="padding: 0.5rem 1rem; font-size: 0.875rem; background-color: var(--neo-blue);">
+                                👁️ View
+                            </button>
                         </li>
                     }
                 </ul>
@@ -92,8 +98,14 @@ else
                 <p class="mb-1">Your PDF has been successfully processed!</p>
                 
                 <div class="neo-file-item">
-                    <span>📄 @project.OutputFile.FileName (@FormatFileSize(project.OutputFile.FileSize))</span>
-                    <span style="font-size: 0.875rem;">@project.OutputFile.CreatedAt.ToString("HH:mm")</span>
+                    <div style="flex: 1;">
+                        <span>📄 @project.OutputFile.FileName (@FormatFileSize(project.OutputFile.FileSize))</span>
+                        <span style="font-size: 0.875rem; margin-left: 1rem;">@project.OutputFile.CreatedAt.ToString("HH:mm")</span>
+                    </div>
+                    <button class="neo-btn neo-btn-success" @onclick="() => ViewPdf(Path.GetFileName(project.OutputFile.FilePath))" 
+                            style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                        👁️ View Result
+                    </button>
                 </div>
 
                 @if (processingMetadata != null && processingMetadata.Any())
@@ -250,6 +262,11 @@ else
             len = len / 1024;
         }
         return $"{len:0.##} {sizes[order]}";
+    }
+
+    private void ViewPdf(string fileName)
+    {
+        Navigation.NavigateTo($"/pdf-viewer/{Uri.EscapeDataString(fileName)}");
     }
 
     private void NavigateHome()

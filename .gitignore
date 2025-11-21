@@ -62,3 +62,13 @@ python/inspect_all_fields.py
 
 # Logs
 *.log
+
+# .NET / Blazor
+bin/
+obj/
+*.user
+*.suo
+*.cache
+.vs/
+WWW.blazor/wwwroot/uploads/
+

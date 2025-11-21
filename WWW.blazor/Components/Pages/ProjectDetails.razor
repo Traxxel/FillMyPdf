@@ -1,0 +1,259 @@
+@page "/project/{ProjectId:guid}"
+@rendermode InteractiveServer
+@using WWW.blazor.Models
+@using WWW.blazor.Services
+@using Microsoft.AspNetCore.Components.Forms
+@inject ProjectService ProjectService
+@inject PdfApiService PdfApiService
+@inject NavigationManager Navigation
+
+<PageTitle>@(project?.Name ?? "Project") - FillMyPdf</PageTitle>
+
+<div class="neo-header">
+    <div class="neo-container">
+        <button class="neo-btn" @onclick="NavigateHome" style="background-color: var(--neo-white); margin-bottom: 1rem;">
+            ← Back to Projects
+        </button>
+        <h1>@(project?.Name ?? "Project")</h1>
+        <p style="font-size: 1.1rem; font-weight: 700;">@(project?.Description ?? "")</p>
+    </div>
+</div>
+
+@if (project == null)
+{
+    <div class="neo-container">
+        <div class="neo-card neo-card-pink text-center">
+            <h2>Project Not Found</h2>
+            <p style="margin-top: 1rem;">The requested project could not be found.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="neo-container">
+        <!-- Input PDFs Section -->
+        <div class="neo-card neo-card-blue mb-2">
+            <h2>📥 Input PDFs</h2>
+            <p class="mb-1">Upload one or more PDF files to extract data from.</p>
+            
+            <InputFile OnChange="HandleInputFileSelected" multiple class="neo-input" accept=".pdf" />
+            
+            @if (project.InputFiles.Any())
+            {
+                <ul class="neo-file-list mt-1">
+                    @foreach (var file in project.InputFiles)
+                    {
+                        <li class="neo-file-item">
+                            <span>📄 @file.FileName (@FormatFileSize(file.FileSize))</span>
+                            <span style="font-size: 0.875rem;">@file.UploadedAt.ToString("HH:mm")</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <!-- Form Template Section -->
+        <div class="neo-card neo-card-purple mb-2">
+            <h2>📋 Form Template PDF</h2>
+            <p class="mb-1">Upload the PDF form template that should be filled.</p>
+            
+            <InputFile OnChange="HandleFormFileSelected" class="neo-input" accept=".pdf" />
+            
+            @if (project.OutputFile != null)
+            {
+                <div class="neo-file-item mt-1">
+                    <span>📄 @formTemplateName</span>
+                </div>
+            }
+        </div>
+
+        <!-- Process Button -->
+        <div class="text-center mb-2">
+            <button class="neo-btn neo-btn-success" 
+                    @onclick="ProcessPdf" 
+                    disabled="@(!CanProcess() || isProcessing)"
+                    style="font-size: 1.2rem; padding: 1.5rem 3rem;">
+                @if (isProcessing)
+                {
+                    <span>⏳ Processing...</span>
+                }
+                else
+                {
+                    <span>🚀 Analyze & Fill</span>
+                }
+            </button>
+        </div>
+
+        <!-- Result Section -->
+        @if (project.OutputFile != null)
+        {
+            <div class="neo-card neo-card-green">
+                <h2>✅ Result</h2>
+                <p class="mb-1">Your PDF has been successfully processed!</p>
+                
+                <div class="neo-file-item">
+                    <span>📄 @project.OutputFile.FileName (@FormatFileSize(project.OutputFile.FileSize))</span>
+                    <span style="font-size: 0.875rem;">@project.OutputFile.CreatedAt.ToString("HH:mm")</span>
+                </div>
+
+                @if (processingMetadata != null && processingMetadata.Any())
+                {
+                    <div class="mt-1">
+                        <h3>Extracted Data:</h3>
+                        <div style="background-color: var(--neo-white); border: 2px solid var(--neo-black); padding: 1rem; margin-top: 0.5rem;">
+                            @foreach (var item in processingMetadata)
+                            {
+                                <div style="margin-bottom: 0.5rem;">
+                                    <strong>@item.Key:</strong> @item.Value
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Error Message -->
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="neo-card" style="background-color: var(--neo-orange); margin-top: 1rem;">
+                <h3>⚠️ Error</h3>
+                <p>@errorMessage</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; set; }
+
+    private Project? project;
+    private string formTemplateName = string.Empty;
+    private string formTemplatePath = string.Empty;
+    private bool isProcessing = false;
+    private string errorMessage = string.Empty;
+    private Dictionary<string, string>? processingMetadata;
+
+    protected override void OnInitialized()
+    {
+        project = ProjectService.GetProject(ProjectId);
+    }
+
+    private async Task HandleInputFileSelected(InputFileChangeEventArgs e)
+    {
+        errorMessage = string.Empty;
+        
+        foreach (var file in e.GetMultipleFiles())
+        {
+            try
+            {
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                Directory.CreateDirectory(uploadsPath);
+                
+                var fileName = $"{Guid.NewGuid()}_{file.Name}";
+                var filePath = Path.Combine(uploadsPath, fileName);
+                
+                await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB max
+                await using var fs = new FileStream(filePath, FileMode.Create);
+                await stream.CopyToAsync(fs);
+                
+                ProjectService.AddInputFile(ProjectId, file.Name, filePath, file.Size);
+                project = ProjectService.GetProject(ProjectId);
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Error uploading file: {ex.Message}";
+            }
+        }
+    }
+
+    private async Task HandleFormFileSelected(InputFileChangeEventArgs e)
+    {
+        errorMessage = string.Empty;
+        var file = e.File;
+        
+        try
+        {
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsPath);
+            
+            var fileName = $"{Guid.NewGuid()}_{file.Name}";
+            var filePath = Path.Combine(uploadsPath, fileName);
+            
+            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            await using var fs = new FileStream(filePath, FileMode.Create);
+            await stream.CopyToAsync(fs);
+            
+            formTemplateName = file.Name;
+            formTemplatePath = filePath;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error uploading form template: {ex.Message}";
+        }
+    }
+
+    private async Task ProcessPdf()
+    {
+        if (project == null || !CanProcess()) return;
+        
+        isProcessing = true;
+        errorMessage = string.Empty;
+        
+        try
+        {
+            var inputFiles = project.InputFiles.Select(f => f.FilePath).ToList();
+            var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", $"output_{Guid.NewGuid()}.pdf");
+            
+            var result = await PdfApiService.ProcessPdfAsync(inputFiles, formTemplatePath, outputPath);
+            
+            if (result != null && result.Status == "success")
+            {
+                var outputFileName = $"filled_{project.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                var fileInfo = new FileInfo(result.OutputFile);
+                
+                ProjectService.SetOutputFile(ProjectId, outputFileName, result.OutputFile, fileInfo.Length);
+                processingMetadata = result.Metadata;
+                project = ProjectService.GetProject(ProjectId);
+            }
+            else
+            {
+                errorMessage = "Failed to process PDF. Please check if the Python API is running.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error processing PDF: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private bool CanProcess()
+    {
+        return project != null && 
+               project.InputFiles.Any() && 
+               !string.IsNullOrEmpty(formTemplatePath);
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+
+    private void NavigateHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+}

@@ -1,0 +1,261 @@
+/* Neobrutalism Design System */
+
+:root {
+    --neo-black: #000000;
+    --neo-white: #FFFFFF;
+    --neo-yellow: #FFD700;
+    --neo-pink: #FF6B9D;
+    --neo-blue: #4A90E2;
+    --neo-green: #2ECC71;
+    --neo-purple: #9B59B6;
+    --neo-orange: #FF8C42;
+    --neo-border: 4px;
+    --neo-shadow: 6px 6px 0px var(--neo-black);
+    --neo-shadow-hover: 8px 8px 0px var(--neo-black);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Space Grotesk', 'Arial Black', sans-serif;
+    background-color: var(--neo-white);
+    color: var(--neo-black);
+    line-height: 1.6;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+}
+
+/* Buttons */
+.neo-btn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    border: var(--neo-border) solid var(--neo-black);
+    background-color: var(--neo-yellow);
+    color: var(--neo-black);
+    cursor: pointer;
+    box-shadow: var(--neo-shadow);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.neo-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--neo-shadow-hover);
+}
+
+.neo-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--neo-black);
+}
+
+.neo-btn-primary {
+    background-color: var(--neo-yellow);
+}
+
+.neo-btn-secondary {
+    background-color: var(--neo-pink);
+}
+
+.neo-btn-success {
+    background-color: var(--neo-green);
+}
+
+.neo-btn-danger {
+    background-color: var(--neo-orange);
+}
+
+/* Cards */
+.neo-card {
+    background-color: var(--neo-white);
+    border: var(--neo-border) solid var(--neo-black);
+    box-shadow: var(--neo-shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: all 0.2s ease;
+}
+
+.neo-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--neo-shadow-hover);
+}
+
+.neo-card-pink {
+    background-color: var(--neo-pink);
+}
+
+.neo-card-blue {
+    background-color: var(--neo-blue);
+}
+
+.neo-card-green {
+    background-color: var(--neo-green);
+}
+
+.neo-card-purple {
+    background-color: var(--neo-purple);
+}
+
+/* Input Fields */
+.neo-input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    border: var(--neo-border) solid var(--neo-black);
+    background-color: var(--neo-white);
+    box-shadow: 4px 4px 0px var(--neo-black);
+    margin-bottom: 1rem;
+}
+
+.neo-input:focus {
+    outline: none;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--neo-black);
+}
+
+.neo-textarea {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    border: var(--neo-border) solid var(--neo-black);
+    background-color: var(--neo-white);
+    box-shadow: 4px 4px 0px var(--neo-black);
+    margin-bottom: 1rem;
+    min-height: 120px;
+    resize: vertical;
+}
+
+.neo-textarea:focus {
+    outline: none;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--neo-black);
+}
+
+/* Container */
+.neo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Grid */
+.neo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Header */
+.neo-header {
+    background-color: var(--neo-yellow);
+    border-bottom: var(--neo-border) solid var(--neo-black);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* File Upload */
+.neo-file-upload {
+    border: var(--neo-border) dashed var(--neo-black);
+    background-color: var(--neo-blue);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.neo-file-upload:hover {
+    background-color: var(--neo-purple);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--neo-shadow);
+}
+
+.neo-file-list {
+    list-style: none;
+    margin-top: 1rem;
+}
+
+.neo-file-item {
+    background-color: var(--neo-white);
+    border: var(--neo-border) solid var(--neo-black);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Modal */
+.neo-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.neo-modal {
+    background-color: var(--neo-white);
+    border: var(--neo-border) solid var(--neo-black);
+    box-shadow: 12px 12px 0px var(--neo-black);
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+}
+
+/* Badge */
+.neo-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    border: 2px solid var(--neo-black);
+    background-color: var(--neo-green);
+    color: var(--neo-black);
+}
+
+/* Utility Classes */
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.text-center { text-align: center; }
+.flex { display: flex; }
+.flex-between { justify-content: space-between; }
+.flex-center { justify-content: center; align-items: center; }
+.gap-1 { gap: 1rem; }
+.gap-2 { gap: 2rem; }

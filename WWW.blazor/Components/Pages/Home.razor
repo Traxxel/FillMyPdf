@@ -1,0 +1,127 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using WWW.blazor.Models
+@using WWW.blazor.Services
+@inject ProjectService ProjectService
+@inject NavigationManager Navigation
+
+<PageTitle>FillMyPdf - Projects</PageTitle>
+
+<div class="neo-header">
+    <div class="neo-container">
+        <h1>📄 FillMyPdf</h1>
+        <p style="font-size: 1.2rem; font-weight: 700;">AI-Powered PDF Form Filling</p>
+    </div>
+</div>
+
+<div class="neo-container">
+    <div class="flex flex-between mb-2" style="align-items: center;">
+        <h2>Your Projects</h2>
+        <button class="neo-btn neo-btn-primary" @onclick="ShowCreateModal">
+            + New Project
+        </button>
+    </div>
+
+    @if (!projects.Any())
+    {
+        <div class="neo-card neo-card-blue text-center">
+            <h3>No Projects Yet</h3>
+            <p style="font-size: 1.1rem; margin-top: 1rem;">Create your first project to get started!</p>
+        </div>
+    }
+    else
+    {
+        <div class="neo-grid">
+            @foreach (var project in projects)
+            {
+                <div class="neo-card" @onclick="() => NavigateToProject(project.Id)" style="cursor: pointer;">
+                    <h3>@project.Name</h3>
+                    <p style="margin: 1rem 0;">@project.Description</p>
+                    
+                    <div class="flex gap-1 mb-1">
+                        <span class="neo-badge" style="background-color: var(--neo-blue);">
+                            📁 @project.InputFiles.Count Input(s)
+                        </span>
+                        @if (project.OutputFile != null)
+                        {
+                            <span class="neo-badge" style="background-color: var(--neo-green);">
+                                ✅ Processed
+                            </span>
+                        }
+                    </div>
+                    
+                    <p style="font-size: 0.875rem; color: #666;">
+                        Created: @project.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                    </p>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (showCreateModal)
+{
+    <div class="neo-modal-overlay" @onclick="HideCreateModal">
+        <div class="neo-modal" @onclick:stopPropagation="true">
+            <h2>Create New Project</h2>
+            
+            <div class="mb-1">
+                <label style="font-weight: 700; display: block; margin-bottom: 0.5rem;">Project Name</label>
+                <input type="text" class="neo-input" @bind="newProjectName" placeholder="Enter project name..." />
+            </div>
+            
+            <div class="mb-2">
+                <label style="font-weight: 700; display: block; margin-bottom: 0.5rem;">Description</label>
+                <textarea class="neo-textarea" @bind="newProjectDescription" placeholder="Enter project description..."></textarea>
+            </div>
+            
+            <div class="flex gap-1">
+                <button class="neo-btn neo-btn-success" @onclick="CreateProject" style="flex: 1;">
+                    Create
+                </button>
+                <button class="neo-btn" @onclick="HideCreateModal" style="flex: 1; background-color: var(--neo-white);">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Project> projects = new();
+    private bool showCreateModal = false;
+    private string newProjectName = string.Empty;
+    private string newProjectDescription = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        projects = ProjectService.GetAllProjects();
+    }
+
+    private void ShowCreateModal()
+    {
+        showCreateModal = true;
+        newProjectName = string.Empty;
+        newProjectDescription = string.Empty;
+    }
+
+    private void HideCreateModal()
+    {
+        showCreateModal = false;
+    }
+
+    private void CreateProject()
+    {
+        if (!string.IsNullOrWhiteSpace(newProjectName))
+        {
+            ProjectService.CreateProject(newProjectName, newProjectDescription);
+            projects = ProjectService.GetAllProjects();
+            HideCreateModal();
+        }
+    }
+
+    private void NavigateToProject(Guid projectId)
+    {
+        Navigation.NavigateTo($"/project/{projectId}");
+    }
+}
